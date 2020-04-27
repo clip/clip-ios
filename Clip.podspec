@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "Clip"
-  spec.version      = "0.0.1"
+  spec.version      = "v0.0.1"
   spec.summary      = "The Clip iOS SDK."
 
   # This description is used to generate tags and improve search results.
