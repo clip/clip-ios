@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "Clip"
-  spec.version      = "v0.0.1"
+  spec.version      = "0.0.1"
   spec.summary      = "The Clip iOS SDK."
 
   # This description is used to generate tags and improve search results.
@@ -80,7 +80,7 @@ Pod::Spec.new do |spec|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  spec.source       = { :git => "https://github.com/Clip/clip-ios.git", :tag => "#{spec.version}" }
+  spec.source       = { :git => "https://github.com/Clip/clip-ios.git", :tag => "v#{spec.version}" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
