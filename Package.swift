@@ -1,29 +1,38 @@
-// swift-tools-version:5.2
-// The swift-tools-version declares the minimum version of Swift required to build this package.
+// swift-tools-version:5.3
 
 import PackageDescription
 
 let package = Package(
-    name: "clip-ios",
-    platforms: [.iOS(SupportedPlatform.IOSVersion.v11)],
+    name: "ClipSDK",
+    defaultLocalization: "en",
+    platforms: [
+        .iOS(.v11)
+    ],
     products: [
-        // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
-            name: "clip-ios",
-            targets: ["clip-ios"]),
+            name: "ClipSDK",
+            // TODO: consider commenting `type: .dynamic` before public release. it's here to use Xcode Previews in Sample app, to work around an Xcode bug.
+            type: .dynamic,
+            targets: ["ClipSDK", "ClipModel"]
+        )
     ],
     dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
+        .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMajor(from: "0.9.0")),
+        .package(url: "https://github.com/WeTransfer/Mocker", .revision("8ff37ffda243669ba7827f639f91f99b53fa4b49"))
     ],
     targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
-            name: "clip-ios",
-            dependencies: []),
+            name: "ClipSDK",
+            dependencies: ["ClipModel"],
+            resources: [.process("Resources")]
+        ),
+        .target(
+            name: "ClipModel",
+            dependencies: ["ZIPFoundation"]
+        ),
         .testTarget(
-            name: "clip-iosTests",
-            dependencies: ["clip-ios"]),
+            name: "ClipServiceTests",
+            dependencies: ["ClipSDK", "Mocker"]
+        )
     ]
 )

@@ -1,2 +1,11 @@
-# clip-ios
-The Clip iOS SDK
+# ClipSDK
+
+Requirements:
+
+- iOS SDK: iOS 11 or newer
+- Xcode 12.2 or newer
+
+Please see the [Documentation](https://github.com/clip/clip-ios/wiki) for installation instructions.
+
+# Licence
+
