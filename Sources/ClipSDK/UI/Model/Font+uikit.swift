@@ -27,13 +27,19 @@ extension ClipModel.Font {
         case .fixed(let size, let weight):
             let scaledSize = UIFontMetrics.default.scaledValue(for: size)
             return UIFont.systemFont(ofSize: scaledSize, weight: weight.uiWeight)
-        case .custom(let fontStyle, let size, let isDynamic):
+        case .custom(let fontName, let size, let isDynamic):
+            let font: UIFont?
             if isDynamic {
                 let scaledSize = UIFontMetrics.default.scaledValue(for: size)
-                return UIFont(name: fontStyle, size: scaledSize)
+                font = UIFont(name: fontName, size: scaledSize)
             } else {
-                return UIFont(name: fontStyle, size: size)
+                font = UIFont(name: fontName, size: size)
             }
+
+            if font == nil {
+                clip_log(.debug, "Missing font %@", fontName)
+            }
+            return font
         }
     }
 }

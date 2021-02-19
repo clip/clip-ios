@@ -20,19 +20,31 @@ import ClipModel
 @available(iOS 13.0, *)
 struct FontModifier: ViewModifier {
     @Environment(\.sizeCategory) private var sizeCategory
+    @State private var uiFont: SwiftUI.Font
 
-    let font: ClipModel.Font
-    
-    func body(content: Content) -> some View {
-        content.font(uiFont)
+    var font: ClipModel.Font
+
+    init(font: ClipModel.Font) {
+        self.font = font
+        self._uiFont = .init(initialValue: getUIFont(for: font))
     }
 
-    private var uiFont: SwiftUI.Font {
-        if let uifont = font.uikitFont {
-            return SwiftUI.Font(uifont)
-        }
-
-        assertionFailure("Font not resolved: \(font)")
-        return .body
+    func body(content: Content) -> some View {
+        content
+            .font(uiFont)
+            .onReceive(NotificationCenter.default.publisher(for: .clipDidRegisterCustomFont)) { _ in
+                uiFont = getUIFont(for: font)
+            }
     }
 }
+
+@available(iOS 13.0, *)
+private func getUIFont(for font: ClipModel.Font) -> SwiftUI.Font {
+    if let uifont = font.uikitFont {
+        return SwiftUI.Font(uifont)
+    }
+
+    return .body
+}
+
+

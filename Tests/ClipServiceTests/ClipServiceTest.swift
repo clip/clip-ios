@@ -17,6 +17,7 @@ import XCTest
 import Mocker
 @testable import ClipSDK
 
+@available(iOS 13.0, *)
 final class ClipServiceTest: XCTestCase {
     
     override func setUp() {
@@ -190,7 +191,7 @@ final class ClipServiceTest: XCTestCase {
         XCTAssertNil(cache.cachedResponse(for: URLRequest(url: url)))
 
         let fetchCompletionExpectation = self.expectation(description: "Fetch should succeed")
-        service.fetchDocumentData(url: url) { result in
+        service.fetchDocumentData(url: url, cachePolicy: .returnCacheDataElseLoad) { result in
             do {
                 _ = try result.get()
 

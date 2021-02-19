@@ -3,7 +3,7 @@
 // copy, modify, and distribute this software in source code or binary form for use
 // in connection with the web services and APIs provided by Rover.
 //
-// This copyright notice shall be included in all copies or substantial portions of 
+// This copyright notice shall be included in all copies or substantial portions of
 // the software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -13,30 +13,25 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import SwiftUI
+import Foundation
 import ClipModel
 
-@available(iOS 13.0, *)
-struct ActionModifier: ViewModifier {
-    var layer: Layer
-    
-    @Environment(\.document) private var document
-    @Environment(\.presentAction) private var presentAction
-    @Environment(\.showAction) private var showAction
-    @Environment(\.dismiss) private var dismiss
-
-    @ViewBuilder
-    func body(content: Content) -> some View {
-        if let action = layer.action, let document = document {
-            Button {
-                action.handle(document: document, show: showAction, present: presentAction, dismiss: dismiss)
-            } label: {
-                content
-            }
-            .buttonStyle(PlainButtonStyle())
-        } else {
-            content
+extension StringTable {
+    func resolve(key: StringKey) -> String {
+        // A simple (and not complete) attempt at RFC 4647 basic filtering.
+        
+        if let matchedLocale = self[Locale.current.identifier], let translation = matchedLocale[key] {
+            return translation
         }
+        
+        guard let languageCode = Locale.current.languageCode else {
+            return key
+        }
+                
+        let matchedLanguage = self.first { (languageEntry, string) in
+            languageEntry == languageCode || languageEntry.starts(with: "\(languageCode)-") || languageEntry.starts(with: "\(languageCode)_")
+        }?.value
+        
+        return matchedLanguage?[key] ?? key
     }
 }
- 

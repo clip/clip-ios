@@ -92,12 +92,12 @@ public final class ClipManager {
     
     /// To customize the Nav Bar View Controller, replace this function reference with a custom one that instantiates your own NavBarViewController subclass.
     @available(iOS 13.0, *)
-    public lazy var navBarViewController: (_ document: Document, _ screen: Screen, _ navBarAppearance: NavBarAppearance?) -> NavBarViewController =
-        NavBarViewController.init(document:screen:navBarAppearance:)
+    public lazy var navBarViewController: (_ document: Document, _ screen: Screen) -> NavBarViewController =
+        NavBarViewController.init(document:screen:)
     
     /// To customize the Screen View Controller, replace this function reference with a custom one that instantiates your own ScreenViewController subclass.
     @available(iOS 13.0, *)
-    public lazy var screenViewController: (_ document: Document, _ screen: Screen, _ navBarAppearance: NavBarAppearance?) -> ScreenViewController = ScreenViewController.init(document:screen:navBarAppearance:)
+    public lazy var screenViewController: (_ document: Document, _ screen: Screen) -> ScreenViewController = ScreenViewController.init(document:screen:)
     
     // MARK: Methods
 
@@ -105,9 +105,8 @@ public final class ClipManager {
     /// - Parameter apnsToken: A globally unique token that identifies this device to APNs.
     public func setPushToken(apnsToken deviceToken: Data) {
         let tokenStringHex = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
-        if #available(iOS 12.0, *) {
-            clip_log(.debug, "Registering for Clip remote notifications with token: %@", tokenStringHex)
-        }
+        clip_log(.debug, "Registering for Clip remote notifications with token: %@", tokenStringHex)
+
         let requestBody = RegisterTokenBody(
             deviceID: UIDevice().identifierForVendor?.uuidString ?? "",
             deviceToken: tokenStringHex,
@@ -128,9 +127,7 @@ public final class ClipManager {
         request.httpBody = body
         URLSession.shared.dataTask(with: request) { result in
             if case .failure(let error) = result {
-                if #available(iOS 12.0, *) {
-                    clip_log(.error, "Failed to register push token: %@", error.debugDescription)
-                }
+                clip_log(.error, "Failed to register push token: %@", error.debugDescription)
             }
         }.resume()
     }
@@ -176,31 +173,40 @@ public final class ClipManager {
         let documentURLs = repository.syncService.persistentFetchedDocumentURLs
         prefetchQueue.async {
             defer { group.leave() }
-            
-            return Set(
-                documentURLs
-                    .compactMap {
-                        self.urlCache.cachedClip(url: $0)
-                    }
-                    .flatMap {
-                        $0.nodes.flatten()
-                    }
-                    .flatMap { node -> [URL] in
-                        switch node {
-                        case let image as Image:
-                            if image.inlineImage == nil && image.darkModeInlineImage == nil {
-                                return [image.imageURL, image.darkModeImageURL].compactMap({ $0 })
-                            } else {
-                                return []
-                            }
-                        default:
+
+            let imageURLs = documentURLs
+                .compactMap {
+                    self.urlCache.cachedClip(url: $0)
+                }
+                .flatMap {
+                    return $0.nodes.flatten()
+                }
+                .flatMap { node -> [URL] in
+                    switch node {
+                    case let image as Image:
+                        if image.inlineImage == nil && image.darkModeInlineImage == nil {
+                            return [image.imageURL, image.darkModeImageURL].compactMap({ $0 })
+                        } else {
                             return []
                         }
+                    default:
+                        return []
                     }
-                    .filter {
-                        self.assetsURLCache.cachedResponse(for: URLRequest(url: $0)) == nil
-                    }
-            ).forEach {
+                }
+                .filter {
+                    self.assetsURLCache.cachedResponse(for: URLRequest(url: $0)) == nil
+                }
+
+            let fontURLs = documentURLs
+                .compactMap {
+                    self.urlCache.cachedClip(url: $0)
+                }
+                .flatMap(\.fonts)
+                .filter {
+                    self.assetsURLCache.cachedResponse(for: URLRequest(url: $0)) == nil
+                }
+
+            Set(imageURLs + fontURLs).forEach {
                 group.enter()
                 self.downloader.enqueue(url: $0, priority: .low) { _ in
                     group.leave()
@@ -342,4 +348,8 @@ private struct RegisterTokenBody: Codable {
     var deviceID: String
     var deviceToken: String
     var environment: String
+}
+
+extension NSNotification.Name {
+    static let clipDidRegisterCustomFont = NSNotification.Name("ClipDidRegisterCustomFont")
 }

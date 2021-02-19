@@ -23,8 +23,8 @@ internal struct DocumentKey: EnvironmentKey {
 }
 
 @available(iOS 13.0, *)
-internal struct NavBarAppearanceKey: EnvironmentKey {
-    static let defaultValue: NavBarAppearance? = nil
+internal struct StringTableKey: EnvironmentKey {
+    static let defaultValue: StringTable = StringTable()
 }
 
 @available(iOS 13.0, *)
@@ -62,13 +62,13 @@ internal extension EnvironmentValues {
         }
     }
     
-    var navBarAppearance: NavBarAppearance? {
+    var stringTable: StringTable {
         get {
-            self[NavBarAppearanceKey.self]
+            self[StringTableKey.self]
         }
         
         set {
-            self[NavBarAppearanceKey.self] = newValue
+            self[StringTableKey.self] = newValue
         }
     }
 

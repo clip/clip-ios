@@ -138,10 +138,55 @@ open class ClipViewController: UIViewController {
             return
         }
 
-        let navViewController = ClipManager.sharedInstance.navBarViewController(document, initialScreen, initialScreen.navBarAppearance)
+        // Register document fonts
+        document.fonts.forEach { url in
+            ClipManager.sharedInstance.downloader.enqueue(url: url, priority: .high) { result in
+                do {
+                    try self.registerFontIfNeeded(data: result.get())
+                } catch {
+                    clip_log(.error, "Document Font: ", error.localizedDescription)
+                }
+            }
+        }
+
+        let navViewController = ClipManager.sharedInstance.navBarViewController(document, initialScreen)
         
         self.restorationIdentifier = "\(document.id)"
         self.setChildViewController(navViewController)
+    }
+
+    private func registerFontIfNeeded(data: Data) throws {
+        struct FontRegistrationError: Swift.Error, LocalizedError {
+            let message: String
+
+            var errorDescription: String? {
+                message
+            }
+        }
+
+        guard let fontProvider = CGDataProvider(data: data as CFData),
+              let cgFont = CGFont(fontProvider),
+              let fontName = cgFont.postScriptName as String?
+        else {
+            throw FontRegistrationError(message: "Unable to register font from provided data.")
+        }
+
+        let queryCollection = CTFontCollectionCreateWithFontDescriptors(
+            [
+                CTFontDescriptorCreateWithAttributes(
+                    [kCTFontNameAttribute: fontName] as CFDictionary
+                )
+            ] as CFArray, nil
+        )
+
+        let fontExists = (CTFontCollectionCreateMatchingFontDescriptors(queryCollection) as? [CTFontDescriptor])?.isEmpty == false
+        if !fontExists {
+            if !CTFontManagerRegisterGraphicsFont(cgFont, nil) {
+                throw FontRegistrationError(message: "Unable to register font: \(fontName)")
+            }
+
+            NotificationCenter.default.post(name: .clipDidRegisterCustomFont, object: fontName)
+        }
     }
 
     private func presentRetrieveRetryDialog(retry: @escaping () -> Void) {
@@ -216,7 +261,6 @@ open class ClipViewController: UIViewController {
     open override var childForStatusBarHidden: UIViewController? {
         children.first
     }
-
 }
 
 #if DEBUG

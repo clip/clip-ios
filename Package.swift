@@ -12,12 +12,11 @@ let package = Package(
         .library(
             name: "ClipSDK",
             // TODO: consider commenting `type: .dynamic` before public release. it's here to use Xcode Previews in Sample app, to work around an Xcode bug.
-            type: .dynamic,
+//            type: .dynamic,
             targets: ["ClipSDK", "ClipModel"]
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMajor(from: "0.9.0")),
         .package(url: "https://github.com/WeTransfer/Mocker", .revision("8ff37ffda243669ba7827f639f91f99b53fa4b49"))
     ],
     targets: [
@@ -27,8 +26,7 @@ let package = Package(
             resources: [.process("Resources")]
         ),
         .target(
-            name: "ClipModel",
-            dependencies: ["ZIPFoundation"]
+            name: "ClipModel"
         ),
         .testTarget(
             name: "ClipServiceTests",

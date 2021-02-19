@@ -31,6 +31,10 @@ struct AnyNode: Decodable {
         switch typeName {
         case Screen.typeName:
             node = try Screen(from: decoder)
+        case NavBar.typeName:
+            node = try NavBar(from: decoder)
+        case NavBarButton.typeName:
+            node = try NavBarButton(from: decoder)
         case HStack.typeName:
             node = try HStack(from: decoder)
         case Image.typeName:

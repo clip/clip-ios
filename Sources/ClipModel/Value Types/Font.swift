@@ -19,7 +19,7 @@ import SwiftUI
 
 public typealias FontFamily = String
 
-public typealias FontStyle = String
+public typealias FontName = String
 
 @available(iOS 13.0, *)
 public enum Font: Decodable, Hashable {
@@ -29,8 +29,8 @@ public enum Font: Decodable, Hashable {
     /// A system font with a fixed size and weight.
     case fixed(size: CGFloat, weight: SwiftUI.Font.Weight)
 
-    /// A custom font which uses the supplied `FontStyle` and given `size`.
-    case custom(fontStyle: FontStyle, size: CGFloat, isDynamic: Bool)
+    /// A custom font which uses the supplied `FontName` and given `size`.
+    case custom(fontName: FontName, size: CGFloat, isDynamic: Bool)
 
     static let largeTitle = Font.dynamic(textStyle: .largeTitle)
     static let title = Font.dynamic(textStyle: .title)
@@ -53,7 +53,7 @@ public enum Font: Decodable, Hashable {
         case size
         case weight
         case isDynamic
-        case fontStyle
+        case fontName
     }
 
     public init(from decoder: Decoder) throws {
@@ -68,10 +68,10 @@ public enum Font: Decodable, Hashable {
             let weight = try container.decode(SwiftUI.Font.Weight.self, forKey: .weight)
             self = .fixed(size: size, weight: weight)
         case "CustomFont":
-            let fontStyle = try container.decode(FontStyle.self, forKey: .fontStyle)
+            let fontName = try container.decode(FontName.self, forKey: .fontName)
             let size = try container.decode(CGFloat.self, forKey: .size)
             let isDynamic = try container.decode(Bool.self, forKey: .isDynamic)
-            self = .custom(fontStyle: fontStyle, size: size, isDynamic: isDynamic)
+            self = .custom(fontName: fontName, size: size, isDynamic: isDynamic)
         default:
             throw DecodingError.dataCorruptedError(
                 forKey: .typeName,

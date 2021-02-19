@@ -40,22 +40,16 @@ public final class Action: Decodable {
         }
     }
     
-    public enum ModalTransitionStyle: String, Decodable {
-        case systemDefault
-        case fadeThrough
-        case slideUp
-    }
-    
     public let actionType: ActionType
     public var screen: Screen?
+    public let modalPresentationStyle: ModalPresentationStyle?
     public let url: URL?
-    public let modalTransitionStyle: ModalTransitionStyle?
     
-    public init(actionType: ActionType, screen: Screen? = nil, url: URL? = nil, modalTransitionStyle: ModalTransitionStyle? = nil) {
+    public init(actionType: ActionType, screen: Screen? = nil, modalPresentationStyle: ModalPresentationStyle? = nil, url: URL? = nil) {
         self.actionType = actionType
         self.screen = screen
+        self.modalPresentationStyle = modalPresentationStyle
         self.url = url
-        self.modalTransitionStyle = modalTransitionStyle
     }
     
     // MARK: Hashable
@@ -63,15 +57,15 @@ public final class Action: Decodable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(actionType)
         hasher.combine(screen?.id)
+        hasher.combine(modalPresentationStyle)
         hasher.combine(url)
-        hasher.combine(modalTransitionStyle)
     }
     
     public static func == (lhs: Action, rhs: Action) -> Bool {
         lhs.actionType == rhs.actionType
             && lhs.screen?.id == rhs.screen?.id
+            && lhs.modalPresentationStyle == rhs.modalPresentationStyle
             && lhs.url == rhs.url
-            && lhs.modalTransitionStyle == rhs.modalTransitionStyle
     }
     
     // MARK: Decodable
@@ -79,16 +73,16 @@ public final class Action: Decodable {
     private enum CodingKeys: String, CodingKey {
         case __typeName
         case screenID
+        case modalPresentationStyle
         case url
-        case modalTransitionStyle
     }
     
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         actionType = try container.decode(ActionType.self, forKey: .__typeName)
-
-        modalTransitionStyle = try container.decodeIfPresent(ModalTransitionStyle.self, forKey: .modalTransitionStyle)
+        
+        modalPresentationStyle = try container.decodeIfPresent(ModalPresentationStyle.self, forKey: .modalPresentationStyle)
         url = try container.decodeIfPresent(URL.self, forKey: .url)
 
         if container.contains(.screenID) {

@@ -22,8 +22,19 @@ struct ScrollContainerView: View {
     
     var body: some View {
         ScrollView(axis, showsIndicators: !scrollContainer.disableScrollBar) {
-            if let layer = scrollContainer.children.first as? Layer {
-                LayerView(layer: layer)
+            switch scrollContainer.axis {
+            case .horizontal:
+                SwiftUI.HStack(spacing: 0) {
+                    ForEach(orderedLayers) {
+                        LayerView(layer: $0)
+                    }
+                }
+            case .vertical:
+                SwiftUI.VStack(spacing: 0) {
+                    ForEach(orderedLayers) {
+                        LayerView(layer: $0)
+                    }
+                }
             }
         }
     }
@@ -35,5 +46,9 @@ struct ScrollContainerView: View {
         case .vertical:
             return .vertical
         }
+    }
+    
+    private var orderedLayers: [Layer] {
+        scrollContainer.children.compactMap { $0 as? Layer }
     }
 }

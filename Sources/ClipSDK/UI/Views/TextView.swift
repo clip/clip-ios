@@ -19,10 +19,11 @@ import ClipModel
 @available(iOS 13.0, *)
 struct TextView: View {
     var text: ClipModel.Text
+    @Environment(\.stringTable) var stringTable
 
     var body: some View {
         RealizeColor(text.textColor) { textColor in
-            SwiftUI.Text(transformed(text.text))
+            SwiftUI.Text(transformed(stringTable.resolve(key: text.text)))
             .modifier(
                 FontModifier(font: text.font)
             )

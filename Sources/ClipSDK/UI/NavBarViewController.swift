@@ -13,44 +13,32 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import UIKit
-import SwiftUI
+import Combine
 import ClipModel
-import os.log
+import SwiftUI
 
 @available(iOS 13.0, *)
-open class NavBarViewController: UINavigationController {
-    let document: Document
-
-    let screen: Screen
+open class NavBarViewController: UINavigationController, UIScrollViewDelegate {
+    private var cancellables = Set<AnyCancellable>()
     
-    let navBarAppearance: NavBarAppearance?
-    
-    private let screenViewController: ScreenViewController
-    
-    public init(document: Document, screen: Screen, navBarAppearance: NavBarAppearance?) {
-        self.document = document
-        self.screen = screen
-        self.navBarAppearance = navBarAppearance
-        screenViewController = ClipManager.sharedInstance.screenViewController(document, screen, navBarAppearance)
-        super.init(nibName: nil, bundle: nil)
-        self.restorationIdentifier = screen.id
-        
-        self.navigationBar.prefersLargeTitles = true
-        
-        switch self.screen.modalPresentationStyle {
-        case .sheet:
-            self.modalPresentationStyle = .pageSheet
-        case .fullScreen:
-            self.modalPresentationStyle = .fullScreen
-        }
+    public init(document: Document, screen: Screen) {
+        let screenVC = ClipManager.sharedInstance.screenViewController(document, screen)
+        super.init(rootViewController: screenVC)
+        restorationIdentifier = screen.id
+        navigationBar.prefersLargeTitles = true
     }
     
-    public override func viewDidLoad() {
+    public required init?(coder aDecoder: NSCoder) {
+        fatalError("Clip's NavBarViewController is not supported in Interface Builder or Storyboards.")
+    }
+    
+    open override func viewDidLoad() {
         super.viewDidLoad()
-        self.show(screenViewController, sender: nil)
+        observeLargeTitleDisplay()
     }
-
+    
+    // MARK: Status Bar
+    
     open override var childForStatusBarStyle: UIViewController? {
         visibleViewController
     }
@@ -58,8 +46,62 @@ open class NavBarViewController: UINavigationController {
     open override var childForStatusBarHidden: UIViewController? {
         visibleViewController
     }
-
-    required public init?(coder: NSCoder) {
-        fatalError("Clip's NavBarViewController is not supported in Interface Builder or Storyboards.")
+    
+    // MARK: Navigation Bar
+    
+    // The `setNavigationBarHidden(_:animated:)` method is called automatically
+    // by `UIHostingController` when it is added to the controller hierarchy.
+    // The locking mechanism below allows us to no-op the calls made by
+    // `UIHostingController` while allowing our own calls to function normally.
+    
+    private var isNavigationBarLocked = true
+    
+    open override var isNavigationBarHidden: Bool {
+        set {
+            isNavigationBarLocked = false
+            setNavigationBarHidden(newValue, animated: false)
+            isNavigationBarLocked = true
+        }
+        
+        get {
+            super.isNavigationBarHidden
+        }
+    }
+    
+    open override func setNavigationBarHidden(_ hidden: Bool, animated: Bool) {
+        guard !isNavigationBarLocked else {
+            return
+        }
+        
+        super.setNavigationBarHidden(hidden, animated: animated)
+    }
+    
+    private func observeLargeTitleDisplay() {
+        navigationBar.publisher(for: \.frame)
+            .map { [unowned self] frame in
+                frame.height >= largeTitleBreakPoint
+            }
+            .removeDuplicates()
+            .sink { [unowned self] isDisplayingLargeTitle in
+                largeTitleDisplayDidChange(isDisplayingLargeTitle)
+            }
+            .store(in: &cancellables)
+    }
+    
+    private var largeTitleBreakPoint: CGFloat {
+        parent?.modalPresentationStyle == .fullScreen ? 60 : 72
+    }
+    
+    private func largeTitleDisplayDidChange(_ isDisplayingLargeTitle: Bool) {
+        guard let screenVC = visibleViewController as? ScreenViewController,
+              let navBar = screenVC.navBar else {
+            return
+        }
+        
+        navigationBar.adjustTintColor(
+            navBar: navBar,
+            traits: traitCollection,
+            isScrolling: !isDisplayingLargeTitle
+        )
     }
 }

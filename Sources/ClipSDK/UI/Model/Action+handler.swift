@@ -20,21 +20,39 @@ import os.log
 
 @available(iOS 13.0, *)
 extension Action {
-    func handle(document: Document, navBarAppearance: NavBarAppearance?, show: (UIViewController) -> Void, present: (UIViewController) -> Void, dismiss: () -> Void) {
+    func handle(document: Document, show: (UIViewController) -> Void, present: (UIViewController) -> Void, dismiss: () -> Void) {
         switch(self.actionType) {
         case .navigateToScreen:
             guard let screen = self.screen else {
                 return
             }
-            let viewController = ClipManager.sharedInstance.screenViewController(document, screen, navBarAppearance)
+            
+            let viewController = ClipManager.sharedInstance.screenViewController(document, screen)
+            switch modalPresentationStyle {
+            case .sheet:
+                viewController.modalPresentationStyle = .pageSheet
+            case .fullScreen:
+                viewController.modalPresentationStyle = .fullScreen
+            default:
+                break
+            }
+            
             show(viewController)
         case .presentScreen:
             guard let screen = self.screen else {
                 return
             }
 
-            let viewController = ClipManager.sharedInstance.navBarViewController(document, screen, navBarAppearance)
-
+            let viewController = ClipManager.sharedInstance.navBarViewController(document, screen)
+            switch modalPresentationStyle {
+            case .sheet:
+                viewController.modalPresentationStyle = .pageSheet
+            case .fullScreen:
+                viewController.modalPresentationStyle = .fullScreen
+            default:
+                break
+            }
+            
             present(viewController)
         case .openURL:
             guard let url = self.url else {
