@@ -93,6 +93,10 @@ struct LayerView: View {
             CarouselView(carousel: carousel)
         case let pageControl as ClipModel.PageControl:
             PageControlView(pageControl: pageControl)
+        case let video as ClipModel.Video:
+            VideoView(video: video)
+        case let audio as ClipModel.Audio:
+            AudioView(audio: audio)
         default:
             EmptyView()
         }

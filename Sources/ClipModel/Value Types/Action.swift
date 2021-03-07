@@ -18,18 +18,15 @@ import Foundation
 @available(iOS 13.0, *)
 public final class Action: Decodable {
     public enum ActionType: String, CaseIterable, Codable, CustomStringConvertible {
-        case navigateToScreen = "NavigateToScreenAction"
-        case presentScreen = "PresentScreenAction"
+        case performSegue = "PerformSegueAction"
         case openURL = "OpenURLAction"
         case presentWebsite = "PresentWebsiteAction"
         case close = "CloseAction"
         
         public var description: String {
             switch self {
-            case .navigateToScreen:
-                return "Navigate To Screen"
-            case .presentScreen:
-                return "Present Screen"
+            case .performSegue:
+                return "Perform Segue"
             case .close:
                 return "Close"
             case .openURL:
@@ -42,12 +39,14 @@ public final class Action: Decodable {
     
     public let actionType: ActionType
     public var screen: Screen?
+    public let segueStyle: SegueStyle?
     public let modalPresentationStyle: ModalPresentationStyle?
     public let url: URL?
     
-    public init(actionType: ActionType, screen: Screen? = nil, modalPresentationStyle: ModalPresentationStyle? = nil, url: URL? = nil) {
+    public init(actionType: ActionType, screen: Screen? = nil, segueStyle: SegueStyle? = nil, modalPresentationStyle: ModalPresentationStyle? = nil, url: URL? = nil) {
         self.actionType = actionType
         self.screen = screen
+        self.segueStyle = segueStyle
         self.modalPresentationStyle = modalPresentationStyle
         self.url = url
     }
@@ -57,6 +56,7 @@ public final class Action: Decodable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(actionType)
         hasher.combine(screen?.id)
+        hasher.combine(segueStyle)
         hasher.combine(modalPresentationStyle)
         hasher.combine(url)
     }
@@ -64,6 +64,7 @@ public final class Action: Decodable {
     public static func == (lhs: Action, rhs: Action) -> Bool {
         lhs.actionType == rhs.actionType
             && lhs.screen?.id == rhs.screen?.id
+            && lhs.segueStyle == rhs.segueStyle
             && lhs.modalPresentationStyle == rhs.modalPresentationStyle
             && lhs.url == rhs.url
     }
@@ -73,6 +74,7 @@ public final class Action: Decodable {
     private enum CodingKeys: String, CodingKey {
         case __typeName
         case screenID
+        case segueStyle
         case modalPresentationStyle
         case url
     }
@@ -82,6 +84,7 @@ public final class Action: Decodable {
 
         actionType = try container.decode(ActionType.self, forKey: .__typeName)
         
+        segueStyle = try container.decodeIfPresent(SegueStyle.self, forKey: .segueStyle)
         modalPresentationStyle = try container.decodeIfPresent(ModalPresentationStyle.self, forKey: .modalPresentationStyle)
         url = try container.decodeIfPresent(URL.self, forKey: .url)
 

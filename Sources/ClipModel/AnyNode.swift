@@ -59,6 +59,10 @@ struct AnyNode: Decodable {
             node = try Carousel(from: decoder)
         case PageControl.typeName:
             node = try PageControl(from: decoder)
+        case Video.typeName:
+            node = try Video(from: decoder)
+        case Audio.typeName:
+            node = try Audio(from: decoder)
         default:
             clip_log(.error, "Unsupported Node type: %@", typeName)
             node = Rectangle(name: "Rectangle", fill: .flat(.clear), border: nil, cornerRadius: 0)

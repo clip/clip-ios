@@ -176,7 +176,7 @@ final class ClipServiceTest: XCTestCase {
              cacheStoragePolicy: .allowed,
              dataType: .json,
              statusCode: 200,
-             data: [.get: #"{"id": 16,"revisionId": 4,"nodes": [], "rootNodeIDs": [], "initialScreenID": "7BE71C5F-CE5E-4BC0-8AC1-7388B35862EF"}"#.data(using: .utf8)!]
+             data: [.get: #"{"id": 16,"revisionId": 4,"nodes": [], "screenIDs": [], "initialScreenID": "7BE71C5F-CE5E-4BC0-8AC1-7388B35862EF"}"#.data(using: .utf8)!]
         )
         let testSlugExpectation = expectationForCompletingMock(&mockTestSlug)
         mockTestSlug.register()

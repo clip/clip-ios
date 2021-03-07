@@ -22,38 +22,28 @@ import os.log
 extension Action {
     func handle(document: Document, show: (UIViewController) -> Void, present: (UIViewController) -> Void, dismiss: () -> Void) {
         switch(self.actionType) {
-        case .navigateToScreen:
+        case .performSegue:
             guard let screen = self.screen else {
                 return
             }
             
-            let viewController = ClipManager.sharedInstance.screenViewController(document, screen)
-            switch modalPresentationStyle {
-            case .sheet:
-                viewController.modalPresentationStyle = .pageSheet
-            case .fullScreen:
-                viewController.modalPresentationStyle = .fullScreen
+            switch segueStyle {
+            case .modal:
+                let viewController = ClipManager.sharedInstance.navBarViewController(document, screen)
+                switch modalPresentationStyle {
+                case .sheet:
+                    viewController.modalPresentationStyle = .pageSheet
+                case .fullScreen:
+                    viewController.modalPresentationStyle = .fullScreen
+                default:
+                    break
+                }
+                
+                present(viewController)
             default:
-                break
+                let viewController = ClipManager.sharedInstance.screenViewController(document, screen)
+                show(viewController)
             }
-            
-            show(viewController)
-        case .presentScreen:
-            guard let screen = self.screen else {
-                return
-            }
-
-            let viewController = ClipManager.sharedInstance.navBarViewController(document, screen)
-            switch modalPresentationStyle {
-            case .sheet:
-                viewController.modalPresentationStyle = .pageSheet
-            case .fullScreen:
-                viewController.modalPresentationStyle = .fullScreen
-            default:
-                break
-            }
-            
-            present(viewController)
         case .openURL:
             guard let url = self.url else {
                 return

@@ -317,7 +317,7 @@ struct ClipViewController_Previews : PreviewProvider {
           }
         }
       ],
-      "rootNodeIDs": [
+      "screenIDs": [
         "7BE71C5F-CE5E-4BC0-8AC1-7388B35862EF"
       ],
       "initialScreenID": "7BE71C5F-CE5E-4BC0-8AC1-7388B35862EF"
