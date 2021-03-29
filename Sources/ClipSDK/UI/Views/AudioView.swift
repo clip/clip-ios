@@ -23,6 +23,8 @@ struct AudioView: View {
 
 @available(iOS 13.0, *)
 private struct AVPlayerView: UIViewControllerRepresentable {
+    @Environment(\.dataItem) private var dataItem
+    
     let audio: Audio
     let isVisible: Bool
 
@@ -37,19 +39,28 @@ private struct AVPlayerView: UIViewControllerRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(audio: audio)
+        Coordinator(audio: audio, dataItem: dataItem)
     }
 
     class Coordinator {
         let player: AVPlayer
         let controller: AVPlayerViewController
+        
         fileprivate var cancellables: Set<AnyCancellable> = []
 
-        init(audio: Audio) {
+        init(audio: Audio, dataItem: DataItem?) {
             self.controller = AVPlayerViewController()
             controller.allowsPictureInPicturePlayback = false
 
-            let videoAsset = AVURLAsset.init(url: audio.sourceURL)
+            let resolvedURL: URL
+            if let override = audio.overrides["url"],
+               let url = dataItem?[override.dataKey] as? URL {
+                resolvedURL = url
+            } else {
+                resolvedURL = audio.sourceURL
+            }
+            
+            let videoAsset = AVURLAsset.init(url: resolvedURL)
             let playerItem = AVPlayerItem(asset: videoAsset)
             self.player = AVPlayer(playerItem: playerItem)
             self.player.isMuted = false

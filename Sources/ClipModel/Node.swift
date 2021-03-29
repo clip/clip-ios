@@ -28,6 +28,9 @@ public class Node: Decodable, Identifiable {
     /// An array of node that are children of this node.
     public private(set) var children = [Node]()
     
+    // Overrides
+    public let overrides: [String: Override]
+    
     // Layout
     public let ignoresSafeArea: Set<Edge>?
     public let aspectRatio: CGFloat?
@@ -49,11 +52,12 @@ public class Node: Decodable, Identifiable {
     public let action: Action?
     public let accessibility: Accessibility?
     
-    public init(id: String = UUID().uuidString, name: String, parent: Node? = nil, children: [Node] = [], ignoresSafeArea: Set<Edge>? = nil, aspectRatio: CGFloat? = nil, padding: Padding? = nil, frame: Frame? = nil, layoutPriority: CGFloat? = nil, offset: CGPoint? = nil, shadow: Shadow? = nil, opacity: CGFloat? = nil, background: Node? = nil, overlay: Node? = nil, mask: Node? = nil, action: Action? = nil, accessibility: Accessibility? = nil) {
+    public init(id: String = UUID().uuidString, name: String, parent: Node? = nil, children: [Node] = [], overrides: [String: Override], ignoresSafeArea: Set<Edge>? = nil, aspectRatio: CGFloat? = nil, padding: Padding? = nil, frame: Frame? = nil, layoutPriority: CGFloat? = nil, offset: CGPoint? = nil, shadow: Shadow? = nil, opacity: CGFloat? = nil, background: Node? = nil, overlay: Node? = nil, mask: Node? = nil, action: Action? = nil, accessibility: Accessibility? = nil) {
         self.id = id
         self.name = name
         self.parent = parent
         self.children = children
+        self.overrides = overrides
         self.ignoresSafeArea = ignoresSafeArea
         self.aspectRatio = aspectRatio
         self.padding = padding
@@ -102,6 +106,7 @@ public class Node: Decodable, Identifiable {
         case childIDs
         case isSelected
         case isCollapsed
+        case overrides
         case ignoresSafeArea
         case aspectRatio
         case padding
@@ -123,6 +128,9 @@ public class Node: Decodable, Identifiable {
         name = try container.decodeIfPresent(String.self, forKey: .name)
         
         let coordinator = decoder.userInfo[.decodingCoordinator] as! DecodingCoordinator
+        
+        // Overrides
+        overrides = try container.decode([String: Override].self, forKey: .overrides)
         
         // Layout
         ignoresSafeArea = try container.decodeIfPresent(Set<Edge>.self, forKey: .ignoresSafeArea)

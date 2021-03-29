@@ -19,13 +19,16 @@ import ClipModel
 
 @available(iOS 13.0, *)
 struct WebViewView: View {
-    var webView: WebView
+    @Environment(\.dataItem) private var dataItem
     @Environment(\.isEnabled) private var isEnabled
+    
+    var webView: WebView
+    
     @State private var loadErrorMessage: String?
 
     var body: some View {
         let webViewUI = WebViewUI(
-            url: webView.url,
+            url: resolvedURL,
             isScrollEnabled: webView.isScrollEnabled,
             isUserInteractionEnabled: isEnabled,
             onFinish: { self.loadErrorMessage = nil },
@@ -36,6 +39,15 @@ struct WebViewView: View {
             return AnyView(webViewUI.loadError(message: message))
         } else {
             return AnyView(webViewUI)
+        }
+    }
+    
+    private var resolvedURL: URL {
+        if let override = webView.overrides["url"],
+           let url = dataItem?[override.dataKey] as? URL {
+            return url
+        } else {
+            return webView.url
         }
     }
 }

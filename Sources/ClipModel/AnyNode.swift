@@ -63,9 +63,13 @@ struct AnyNode: Decodable {
             node = try Video(from: decoder)
         case Audio.typeName:
             node = try Audio(from: decoder)
+        case DataSource.typeName:
+            node = try DataSource(from: decoder)
+        case Collection.typeName:
+            node = try Collection(from: decoder)
         default:
             clip_log(.error, "Unsupported Node type: %@", typeName)
-            node = Rectangle(name: "Rectangle", fill: .flat(.clear), border: nil, cornerRadius: 0)
+            node = Rectangle(name: "Rectangle", overrides: [:], fill: .flat(.clear), border: nil, cornerRadius: 0)
         }
     }
 }

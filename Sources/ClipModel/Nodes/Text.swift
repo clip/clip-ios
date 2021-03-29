@@ -31,14 +31,14 @@ public final class Text: Layer {
     public let lineLimit: Int?
     public let transform: Transform?
     
-    public init(id: String = UUID().uuidString, name: String = "Text", parent: Node? = nil, children: [Node] = [], ignoresSafeArea: Set<Edge>? = nil, aspectRatio: CGFloat? = nil, padding: Padding? = nil, frame: Frame? = nil, layoutPriority: CGFloat? = nil, offset: CGPoint? = nil, shadow: Shadow? = nil, opacity: CGFloat? = nil, background: Node? = nil, overlay: Node? = nil, mask: Node? = nil, action: Action? = nil, accessibility: Accessibility? = nil, text: String, font: Font, textColor: ColorVariants, textAlignment: TextAlignment, lineLimit: Int?, transform: Text.Transform?) {
+    public init(id: String = UUID().uuidString, name: String = "Text", parent: Node? = nil, children: [Node] = [], overrides: [String: Override], ignoresSafeArea: Set<Edge>? = nil, aspectRatio: CGFloat? = nil, padding: Padding? = nil, frame: Frame? = nil, layoutPriority: CGFloat? = nil, offset: CGPoint? = nil, shadow: Shadow? = nil, opacity: CGFloat? = nil, background: Node? = nil, overlay: Node? = nil, mask: Node? = nil, action: Action? = nil, accessibility: Accessibility? = nil, text: String, font: Font, textColor: ColorVariants, textAlignment: TextAlignment, lineLimit: Int?, transform: Text.Transform?) {
         self.text = text
         self.font = font
         self.textColor = textColor
         self.textAlignment = textAlignment
         self.lineLimit = lineLimit
         self.transform = transform
-        super.init(id: id, name: name, parent: parent, children: children, ignoresSafeArea: ignoresSafeArea, aspectRatio: aspectRatio, padding: padding, frame: frame, layoutPriority: layoutPriority, offset: offset, shadow: shadow, opacity: opacity, background: background, overlay: overlay, mask: mask, action: action, accessibility: accessibility)
+        super.init(id: id, name: name, parent: parent, children: children, overrides: overrides, ignoresSafeArea: ignoresSafeArea, aspectRatio: aspectRatio, padding: padding, frame: frame, layoutPriority: layoutPriority, offset: offset, shadow: shadow, opacity: opacity, background: background, overlay: overlay, mask: mask, action: action, accessibility: accessibility)
     }
 
     // MARK: Decodable

@@ -21,13 +21,15 @@ import Combine
 open class ScreenViewController: UIViewController, UIScrollViewDelegate {
     let document: Document
     let screen: Screen
+    let dataItem: DataItem?
     
     private var carouselState = CarouselState()
     private var cancellables: Set<AnyCancellable> = []
     
-    public init(document: Document, screen: Screen) {
+    public init(document: Document, screen: Screen, dataItem: DataItem? = nil) {
         self.document = document
         self.screen = screen
+        self.dataItem = dataItem
         super.init(nibName: nil, bundle: nil)
         super.restorationIdentifier = screen.id
     }
@@ -107,6 +109,7 @@ open class ScreenViewController: UIViewController, UIScrollViewDelegate {
             navigationItem.configure(
                 navBar: navBar,
                 stringTable: document.localization,
+                dataItem: dataItem,
                 traits: traitCollection,
                 buttonHandler: navBarButtonTapped
             )
@@ -138,7 +141,9 @@ open class ScreenViewController: UIViewController, UIScrollViewDelegate {
                 },
                 dismiss: {
                     self.dismiss(animated: true)
-                }
+                },
+                dataItem: dataItem,
+                overrides: navBarButton.overrides
             )
         }
     }
@@ -171,7 +176,7 @@ open class ScreenViewController: UIViewController, UIScrollViewDelegate {
     }
     
     private func addLayer(_ layer: Layer) {
-        let rootView = viewForLayer(layer)
+        let rootView = viewForLayer(layer).environment(\.dataItem, dataItem)
         
         let hostingController = UIHostingController(
             rootView: rootView,

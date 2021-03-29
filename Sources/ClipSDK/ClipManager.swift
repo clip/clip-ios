@@ -92,12 +92,12 @@ public final class ClipManager {
     
     /// To customize the Nav Bar View Controller, replace this function reference with a custom one that instantiates your own NavBarViewController subclass.
     @available(iOS 13.0, *)
-    public lazy var navBarViewController: (_ document: Document, _ screen: Screen) -> NavBarViewController =
-        NavBarViewController.init(document:screen:)
+    public lazy var navBarViewController: (_ document: Document, _ screen: Screen, _ dataItem: DataItem?) -> NavBarViewController =
+        NavBarViewController.init(document:screen:dataItem:)
     
     /// To customize the Screen View Controller, replace this function reference with a custom one that instantiates your own ScreenViewController subclass.
     @available(iOS 13.0, *)
-    public lazy var screenViewController: (_ document: Document, _ screen: Screen) -> ScreenViewController = ScreenViewController.init(document:screen:)
+    public lazy var screenViewController: (_ document: Document, _ screen: Screen, _ dataItem: DataItem?) -> ScreenViewController = ScreenViewController.init(document:screen:dataItem:)
     
     // MARK: Methods
 

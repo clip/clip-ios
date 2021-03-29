@@ -83,8 +83,15 @@ extension UINavigationBar {
 
 @available(iOS 13.0, *)
 extension UINavigationItem {
-    func configure(navBar: NavBar, stringTable: StringTable, traits: UITraitCollection, buttonHandler: @escaping (NavBarButton) -> Void) {
-        title = stringTable.resolve(key: navBar.title)
+    func configure(navBar: NavBar, stringTable: StringTable, dataItem: DataItem?, traits: UITraitCollection, buttonHandler: @escaping (NavBarButton) -> Void) {
+        
+        if let override = navBar.overrides["title"],
+           let title = dataItem?[override.dataKey] as? String {
+            self.title = title
+        } else {
+            title = stringTable.resolve(key: navBar.title)
+        }
+        
         hidesBackButton = navBar.hidesBackButton
         
         switch navBar.titleDisplayMode {

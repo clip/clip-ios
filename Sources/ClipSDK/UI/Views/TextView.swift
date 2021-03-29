@@ -18,12 +18,14 @@ import ClipModel
 
 @available(iOS 13.0, *)
 struct TextView: View {
+    @Environment(\.dataItem) private var dataItem
+    @Environment(\.stringTable) private var stringTable
+    
     var text: ClipModel.Text
-    @Environment(\.stringTable) var stringTable
-
+    
     var body: some View {
         RealizeColor(text.textColor) { textColor in
-            SwiftUI.Text(transformed(stringTable.resolve(key: text.text)))
+            SwiftUI.Text(transformed(stringTable.resolve(key: resolvedText)))
             .modifier(
                 FontModifier(font: text.font)
             )
@@ -31,6 +33,24 @@ struct TextView: View {
             .multilineTextAlignment(uiTextAlignment)
             .lineLimit(text.lineLimit)
             .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+    
+    private var resolvedText: String {        
+        if let override = text.overrides["text"] {
+            if let text = dataItem?[override.dataKey] as? String {
+                return text
+            } else if let date = dataItem?[override.dataKey] as? Date {
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = override.dateFormat
+                return dateFormatter.string(from: date)
+            } else if let number = dataItem?[override.dataKey] as? Double {
+                return NumberFormatter().string(from: number as NSNumber) ?? text.text
+            } else {
+                return text.text
+            }
+        } else {
+            return text.text
         }
     }
     

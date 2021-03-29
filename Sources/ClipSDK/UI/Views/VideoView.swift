@@ -22,6 +22,8 @@ struct VideoView: View {
 
 @available(iOS 13.0, *)
 private struct AVPlayerView: UIViewControllerRepresentable {
+    @Environment(\.dataItem) private var dataItem
+    
     let video: Video
     let isVisible: Bool
 
@@ -36,23 +38,32 @@ private struct AVPlayerView: UIViewControllerRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(video: video)
+        Coordinator(video: video, dataItem: dataItem)
     }
 
     class Coordinator {
         let video: Video
         let player: AVPlayer
         let controller: AVPlayerViewController
+        
         fileprivate var cancellables: Set<AnyCancellable> = []
 
-        init(video: Video) {
+        init(video: Video, dataItem: DataItem?) {
             self.video = video
             self.controller = AVPlayerViewController()
             controller.showsPlaybackControls = video.showControls
             controller.allowsPictureInPicturePlayback = false
             controller.videoGravity = video.resizingMode.avPlayerGravity
 
-            let videoAsset = AVURLAsset(url: video.sourceURL)
+            let resolvedURL: URL
+            if let override = video.overrides["url"],
+               let url = dataItem?[override.dataKey] as? URL {
+                resolvedURL = url
+            } else {
+                resolvedURL = video.sourceURL
+            }
+            
+            let videoAsset = AVURLAsset(url: resolvedURL)
             let playerItem = AVPlayerItem(asset: videoAsset)
 
             if video.removeAudio {

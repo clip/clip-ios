@@ -20,7 +20,7 @@ import os.log
 
 @available(iOS 13.0, *)
 extension Action {
-    func handle(document: Document, show: (UIViewController) -> Void, present: (UIViewController) -> Void, dismiss: () -> Void) {
+    func handle(document: Document, show: (UIViewController) -> Void, present: (UIViewController) -> Void, dismiss: () -> Void, dataItem: DataItem?, overrides: [String: Override]) {
         switch(self.actionType) {
         case .performSegue:
             guard let screen = self.screen else {
@@ -29,7 +29,7 @@ extension Action {
             
             switch segueStyle {
             case .modal:
-                let viewController = ClipManager.sharedInstance.navBarViewController(document, screen)
+                let viewController = ClipManager.sharedInstance.navBarViewController(document, screen, dataItem)
                 switch modalPresentationStyle {
                 case .sheet:
                     viewController.modalPresentationStyle = .pageSheet
@@ -41,23 +41,37 @@ extension Action {
                 
                 present(viewController)
             default:
-                let viewController = ClipManager.sharedInstance.screenViewController(document, screen)
+                let viewController = ClipManager.sharedInstance.screenViewController(document, screen, dataItem)
                 show(viewController)
             }
         case .openURL:
-            guard let url = self.url else {
+            let resolvedURL: URL
+            if let override = overrides["url"],
+               let url = dataItem?.rawValue[override.dataKey] as? URL {
+                resolvedURL = url
+            } else if let url = self.url {
+                resolvedURL = url
+            } else {
                 return
             }
-            UIApplication.shared.open(url) { success in
+            
+            UIApplication.shared.open(resolvedURL) { success in
                 if !success {
-                    clip_log(.error, "Unable to present unhandled URL: %@", url.absoluteString)
+                    clip_log(.error, "Unable to present unhandled URL: %@", resolvedURL.absoluteString)
                 }
             }
         case .presentWebsite:
-            guard let url = self.url else  {
+            let resolvedURL: URL
+            if let override = overrides["url"],
+               let url = dataItem?.rawValue[override.dataKey] as? URL {
+                resolvedURL = url
+            } else if let url = self.url {
+                resolvedURL = url
+            } else {
                 return
             }
-            let viewController = SFSafariViewController(url: url)
+            
+            let viewController = SFSafariViewController(url: resolvedURL)
             present(viewController)
         case .close:
             dismiss()

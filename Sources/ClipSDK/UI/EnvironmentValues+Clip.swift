@@ -51,6 +51,11 @@ internal struct DismissKey: EnvironmentKey {
 }
 
 @available(iOS 13.0, *)
+internal struct DataItemKey: EnvironmentKey {
+    static let defaultValue: DataItem? = nil
+}
+
+@available(iOS 13.0, *)
 internal extension EnvironmentValues {
     var document: Document? {
         get {
@@ -99,6 +104,16 @@ internal extension EnvironmentValues {
         
         set {
             self[DismissKey.self] = newValue
+        }
+    }
+    
+    var dataItem: DataItem? {
+        get {
+            return self[DataItemKey.self]
+        }
+        
+        set {
+            self[DataItemKey.self] = newValue
         }
     }
 }

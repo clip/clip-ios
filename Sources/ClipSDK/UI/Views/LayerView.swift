@@ -97,6 +97,10 @@ struct LayerView: View {
             VideoView(video: video)
         case let audio as ClipModel.Audio:
             AudioView(audio: audio)
+        case let dataSource as ClipModel.DataSource:
+            DataSourceView(dataSource: dataSource)
+        case let collection as ClipModel.Collection:
+            CollectionView(collection: collection)
         default:
             EmptyView()
         }

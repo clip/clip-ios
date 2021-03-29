@@ -24,12 +24,13 @@ struct ActionModifier: ViewModifier {
     @Environment(\.presentAction) private var presentAction
     @Environment(\.showAction) private var showAction
     @Environment(\.dismiss) private var dismiss
-
+    @Environment(\.dataItem) private var dataItem
+    
     @ViewBuilder
     func body(content: Content) -> some View {
         if let action = layer.action, let document = document {
             Button {
-                action.handle(document: document, show: showAction, present: presentAction, dismiss: dismiss)
+                action.handle(document: document, show: showAction, present: presentAction, dismiss: dismiss, dataItem: dataItem, overrides: layer.overrides)
             } label: {
                 content
             }

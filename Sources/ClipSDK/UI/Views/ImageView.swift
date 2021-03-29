@@ -19,12 +19,13 @@ import os.log
 
 @available(iOS 13.0, *)
 struct ImageView: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dataItem) private var dataItem
+    
     var image: ClipModel.Image
     
-    @Environment(\.colorScheme) private var colorScheme
-    
     var body: some View {
-        ImageFetcherHost(image: image)
+        ImageFetcherHost(image: image, dataItem: dataItem)
             // in lieu of .onChange(), use this outer view with a .id() modifier to ensure the image is re-evaluated when the colorScheme changes.
             .id(colorScheme)
     }
@@ -36,9 +37,9 @@ private struct ImageFetcherHost: View {
     
     @State private var fetcher: ImageFetcher
         
-    init(image: ClipModel.Image) {
+    init(image: ClipModel.Image, dataItem: DataItem?) {
         self.image = image
-        self._fetcher = State(wrappedValue: ImageFetcher(image: image))
+        self._fetcher = State(wrappedValue: ImageFetcher(image: image, dataItem: dataItem))
     }
         
     var body: some View {
@@ -100,16 +101,10 @@ private struct ImageFromFetcher: View {
                         .transition(.opacity)
                 }
             } else {
-                Group {
-                    if fetcher.failed {
-                        blurhash.overlay(Image(systemName: "xmark").accessibility(label: Text("Image Download Failed"))).transition(.opacity)
-                    } else {
-                        blurhash.transition(.opacity)
+                blurhash.transition(.opacity)
+                    .onAppear {
+                        fetcher.startFetch(darkMode: colorScheme == .dark)
                     }
-                }
-                .onAppear {
-                    fetcher.startFetch(darkMode: colorScheme == .dark)
-                }
             }
         }
     }
@@ -121,8 +116,8 @@ private struct ImageFromFetcher: View {
             SwiftUI.Image(uiImage: uiImage)
                 .resizable()
                 .frame(
-                    width: image.estimatedImageScaledFrameWidth(darkMode: colorScheme == .dark),
-                    height: image.estimatedImageScaledFrameHeight(darkMode: colorScheme == .dark)
+                    width: image.estimatedImageScaledFrameWidth(darkMode: colorScheme == .dark) ?? (uiImage.size.width / (!image.resolution.isZero ? image.resolution : 1)),
+                    height: image.estimatedImageScaledFrameHeight(darkMode: colorScheme == .dark) ?? (uiImage.size.height / (!image.resolution.isZero ? image.resolution : 1))
                 )
         case .scaleToFill:
                 SwiftUI.Rectangle().fill(Color.clear)
@@ -197,9 +192,11 @@ private struct ImageFromFetcher: View {
 @available(iOS 13.0, *)
 private class ImageFetcher: ObservableObject {
     private let image: ClipModel.Image
+    private let dataItem: DataItem?
     
-    init(image: ClipModel.Image) {
+    init(image: ClipModel.Image, dataItem: DataItem?) {
         self.image = image
+        self.dataItem = dataItem
     }
     
     private enum State: Equatable {
@@ -216,15 +213,31 @@ private class ImageFetcher: ObservableObject {
     }
     
     func image(darkMode: Bool) -> UIImage? {
-        if darkMode, let darkModeImage = image.darkModeInlineImage {
-            return darkModeImage
+        let url: URL
+        switch (darkMode, image.darkModeImageURL) {
+        case (true, let darkModeImageURL?):
+            if let override = image.overrides["darkModeValue"],
+               let overriddenURL = dataItem?[override.dataKey] as? URL {
+                url = overriddenURL
+            } else {
+                if let darkModeImage = image.darkModeInlineImage {
+                    return darkModeImage
+                }
+                
+                url = darkModeImageURL
+            }
+        default:
+            if let override = image.overrides["defaultValue"],
+               let overriddenURL = dataItem?[override.dataKey] as? URL {
+                url = overriddenURL
+            } else {
+                if let image = image.inlineImage {
+                    return image
+                }
+                
+                url = image.imageURL
+            }
         }
-        
-        if let image = image.inlineImage {
-            return image
-        }
-        
-        let url = darkMode ? (image.darkModeImageURL ?? image.imageURL) : image.imageURL
         
         // first, if this image was already loaded, then return it.
         if case let State.loaded(uiImage) = state {
@@ -258,7 +271,23 @@ private class ImageFetcher: ObservableObject {
             return
         }
         
-        let url = darkMode ? (image.darkModeImageURL ?? image.imageURL) : image.imageURL
+        let url: URL
+        switch (darkMode, image.darkModeImageURL) {
+        case (true, let darkModeImageURL?):
+            if let override = image.overrides["darkModeValue"],
+               let overriddenURL = dataItem?[override.dataKey] as? URL {
+                url = overriddenURL
+            } else {
+                url = darkModeImageURL
+            }
+        default:
+            if let override = image.overrides["defaultValue"],
+               let overriddenURL = dataItem?[override.dataKey] as? URL {
+                url = overriddenURL
+            } else {
+                url = image.imageURL
+            }
+        }
       
         func setState(_ state: State) {
             DispatchQueue.main.async {

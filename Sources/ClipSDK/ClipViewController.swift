@@ -149,7 +149,7 @@ open class ClipViewController: UIViewController {
             }
         }
 
-        let navViewController = ClipManager.sharedInstance.navBarViewController(document, initialScreen)
+        let navViewController = ClipManager.sharedInstance.navBarViewController(document, initialScreen, nil)
         
         self.restorationIdentifier = "\(document.id)"
         self.setChildViewController(navViewController)

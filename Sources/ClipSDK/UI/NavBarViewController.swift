@@ -21,8 +21,8 @@ import SwiftUI
 open class NavBarViewController: UINavigationController, UIScrollViewDelegate {
     private var cancellables = Set<AnyCancellable>()
     
-    public init(document: Document, screen: Screen) {
-        let screenVC = ClipManager.sharedInstance.screenViewController(document, screen)
+    public init(document: Document, screen: Screen, dataItem: DataItem? = nil) {
+        let screenVC = ClipManager.sharedInstance.screenViewController(document, screen, dataItem)
         super.init(rootViewController: screenVC)
         restorationIdentifier = screen.id
         navigationBar.prefersLargeTitles = true

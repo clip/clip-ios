@@ -55,7 +55,7 @@ public final class Image: Layer {
     
     public let darkModeInlineImage: UIImage?
     
-    public init(id: String = UUID().uuidString, name: String = "Image", parent: Node? = nil, children: [Node] = [], ignoresSafeArea: Set<Edge>? = nil, aspectRatio: CGFloat? = nil, padding: Padding? = nil, frame: Frame? = nil, layoutPriority: CGFloat? = nil, offset: CGPoint? = nil, shadow: Shadow? = nil, opacity: CGFloat? = nil, background: Node? = nil, overlay: Node? = nil, mask: Node? = nil, action: Action? = nil, accessibility: Accessibility? = nil, imageURL: URL, darkModeImageURL: URL?, resolution: CGFloat, resizingMode: Image.ResizingMode, blurHash: String?, darkModeBlurHash: String?, imageWidth: Int?, imageHeight: Int?, darkModeImageWidth: Int?, darkModeImageHeight: Int?) {
+    public init(id: String = UUID().uuidString, name: String = "Image", parent: Node? = nil, children: [Node] = [], overrides: [String: Override], ignoresSafeArea: Set<Edge>? = nil, aspectRatio: CGFloat? = nil, padding: Padding? = nil, frame: Frame? = nil, layoutPriority: CGFloat? = nil, offset: CGPoint? = nil, shadow: Shadow? = nil, opacity: CGFloat? = nil, background: Node? = nil, overlay: Node? = nil, mask: Node? = nil, action: Action? = nil, accessibility: Accessibility? = nil, imageURL: URL, darkModeImageURL: URL?, resolution: CGFloat, resizingMode: Image.ResizingMode, blurHash: String?, darkModeBlurHash: String?, imageWidth: Int?, imageHeight: Int?, darkModeImageWidth: Int?, darkModeImageHeight: Int?) {
         self.imageURL = imageURL
         self.darkModeImageURL = darkModeImageURL
         self.resolution = resolution
@@ -68,10 +68,10 @@ public final class Image: Layer {
         self.darkModeImageHeight = darkModeImageHeight
         self.inlineImage = nil
         self.darkModeInlineImage = nil
-        super.init(id: id, name: name, parent: parent, children: children, ignoresSafeArea: ignoresSafeArea, aspectRatio: aspectRatio, padding: padding, frame: frame, layoutPriority: layoutPriority, offset: offset, shadow: shadow, opacity: opacity, background: background, overlay: overlay, mask: mask, action: action, accessibility: accessibility)
+        super.init(id: id, name: name, parent: parent, children: children, overrides: overrides, ignoresSafeArea: ignoresSafeArea, aspectRatio: aspectRatio, padding: padding, frame: frame, layoutPriority: layoutPriority, offset: offset, shadow: shadow, opacity: opacity, background: background, overlay: overlay, mask: mask, action: action, accessibility: accessibility)
     }
     
-    public init(id: String = UUID().uuidString, name: String = "Image", parent: Node? = nil, children: [Node] = [], ignoresSafeArea: Set<Edge>? = nil, aspectRatio: CGFloat? = nil, padding: Padding? = nil, frame: Frame? = nil, layoutPriority: CGFloat? = nil, offset: CGPoint? = nil, shadow: Shadow? = nil, opacity: CGFloat? = nil, background: Node? = nil, overlay: Node? = nil, mask: Node? = nil, action: Action? = nil, accessibility: Accessibility? = nil, image: UIImage, darkModeImage: UIImage?, resolution: CGFloat? = nil, resizingMode: Image.ResizingMode, blurHash: String?, darkModeBlurHash: String?) {
+    public init(id: String = UUID().uuidString, name: String = "Image", parent: Node? = nil, children: [Node] = [], overrides: [String: Override], ignoresSafeArea: Set<Edge>? = nil, aspectRatio: CGFloat? = nil, padding: Padding? = nil, frame: Frame? = nil, layoutPriority: CGFloat? = nil, offset: CGPoint? = nil, shadow: Shadow? = nil, opacity: CGFloat? = nil, background: Node? = nil, overlay: Node? = nil, mask: Node? = nil, action: Action? = nil, accessibility: Accessibility? = nil, image: UIImage, darkModeImage: UIImage?, resolution: CGFloat? = nil, resizingMode: Image.ResizingMode, blurHash: String?, darkModeBlurHash: String?) {
         self.imageURL = URL(string: "clip://inline-image")!
         self.darkModeImageURL = darkModeImage.map { _ in URL(string: "clip://inline-image")! }
         self.resizingMode = resizingMode
@@ -85,7 +85,7 @@ public final class Image: Layer {
         self.inlineImage = image
         self.darkModeInlineImage = darkModeImage
         
-        super.init(id: id, name: name, parent: parent, children: children, ignoresSafeArea: ignoresSafeArea, aspectRatio: aspectRatio, padding: padding, frame: frame, layoutPriority: layoutPriority, offset: offset, shadow: shadow, opacity: opacity, background: background, overlay: overlay, mask: mask, action: action, accessibility: accessibility)
+        super.init(id: id, name: name, parent: parent, children: children, overrides: overrides, ignoresSafeArea: ignoresSafeArea, aspectRatio: aspectRatio, padding: padding, frame: frame, layoutPriority: layoutPriority, offset: offset, shadow: shadow, opacity: opacity, background: background, overlay: overlay, mask: mask, action: action, accessibility: accessibility)
     }
     
     // MARK: Decodable
